@@ -1,27 +1,22 @@
 {
-  "name": "veritix-express",
+  "name": "admin-auth-api",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Admin authentication and authorization API",
+  "main": "dist/index.js",
   "scripts": {
     "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts",
-    "build": "tsc"
+    "dev": "nodemon --exec ts-node src/index.ts",
+    "build": "tsc",
+    "init-db": "ts-node src/scripts/init-db.ts",
+    "test": "jest"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/nafiuishaaq/veritix-express.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/nafiuishaaq/veritix-express/issues"
-  },
-  "homepage": "https://github.com/nafiuishaaq/veritix-express#readme",
   "dependencies": {
+    "bcrypt": "^5.1.1",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.0",
     "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "multer": "^1.4.5-lts.1",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
@@ -31,9 +26,14 @@
     "typeorm": "^0.3.21"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.17",
-    "@types/express": "^5.0.1",
+    "@types/express": "^4.17.21",
+    "@types/multer": "^1.4.11",
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.2",
+    "ts-jest": "^29.1.1",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.13.13",
@@ -43,3 +43,4 @@
     "typescript": "^5.8.2"
   }
 }
+
