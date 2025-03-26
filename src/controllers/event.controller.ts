@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { AppDataSource } from '../data-source';
-import { Event } from '../model/event.entity';
+import { Event } from '../entities/event.entity';
 
 const eventRepository = AppDataSource.getRepository(Event);
 
