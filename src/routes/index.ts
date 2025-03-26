@@ -6,8 +6,8 @@ import ticketRoutes from './ticket.route';
 const router = express.Router();
 
 router.use('/admin', adminRoutes);
-router.use('/event', eventRoutes);
-router.use('/ticket', ticketRoutes);
+router.use('/events', eventRoutes);
+router.use('/tickets', ticketRoutes);
 
 
 export default router;
