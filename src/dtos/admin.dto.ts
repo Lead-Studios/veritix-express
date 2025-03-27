@@ -11,7 +11,7 @@ export class CreateAdminDto {
 
   @IsNotEmpty()
   @IsString()
-  lastName!: string
+  lastName?: string
 
   @IsNotEmpty()
   @IsString()
