@@ -5,6 +5,7 @@ import "reflect-metadata"
 import { AppDataSource } from "./config/database"
 import router from "./routes/index"
 import { errorHandler, notFoundHandler } from "./middlewares/error.middleware"
+import { swaggerUi, specs } from "./swagger";
 
 // Initialize express app
 const app = express()
@@ -24,7 +25,7 @@ app.use(errorHandler)
 
 // Database connection and server startup
 const PORT = process.env.PORT || 3000
-
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(specs));
 AppDataSource.initialize()
   .then(() => {
     console.log("Database connection established")
