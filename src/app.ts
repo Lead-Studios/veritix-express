@@ -3,9 +3,10 @@ import cors from "cors"
 import helmet from "helmet"
 import "reflect-metadata"
 import { AppDataSource } from "./config/database"
-import router from "./routes/index"
+import adminRoutes from "./routes/admin.routes"
 import { errorHandler, notFoundHandler } from "./middlewares/error.middleware"
-import { swaggerUi, specs } from "./swagger";
+import 'reflect-metadata';
+import userRoutes from "./routes/userRoutes"
 
 // Initialize express app
 const app = express()
@@ -17,7 +18,8 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 // Routes
-app.use("/api", router)
+app.use("/admin", adminRoutes)
+app.use("/users", userRoutes) 
 
 // Error handling
 app.use(notFoundHandler)
@@ -25,7 +27,7 @@ app.use(errorHandler)
 
 // Database connection and server startup
 const PORT = process.env.PORT || 3000
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(specs));
+
 AppDataSource.initialize()
   .then(() => {
     console.log("Database connection established")

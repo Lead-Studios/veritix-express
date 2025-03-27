@@ -1,36 +1,81 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
+import type { Request, Response, NextFunction } from "express"
+import jwt from "jsonwebtoken"
+import { AppDataSource } from "../config/database"
+import { Admin } from "../entities/admin.entity"
 
-dotenv.config();
-
-export interface AuthRequest extends Request {
-  user?: any;
+declare global {
+  namespace Express {
+    interface Request {
+      admin?: Admin
+    }
+  }
 }
 
-export const authenticate = (req: AuthRequest, res: Response, next: NextFunction): void => {
-  const token = req.header('Authorization')?.split(' ')[1];
-
-  if (!token) {
-    res.status(401).json({ message: 'Access Denied. No token provided' });
-    return; // Ensure function execution stops
-  }
-
+export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    res.status(400).json({ message: 'Invalid token' });
-  }
-};
+    const authHeader = req.headers.authorization
 
-export const authorize = (roles: string[]) => {
-  return (req: AuthRequest, res: Response, next: NextFunction): void => {
-    if (!req.user || !roles.includes(req.user.role)) {
-      res.status(403).json({ message: 'Forbidden: Insufficient permissions' });
-      return;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({
+        status: "error",
+        message: "Authentication required",
+      })
     }
-    next();
-  };
-};
+
+    const token = authHeader.split(" ")[1]
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: number }
+
+    const adminRepository = AppDataSource.getRepository(Admin)
+    const admin = await adminRepository.findOne({
+      where: { id: decoded.id },
+      relations: ["role"],
+    })
+
+    if (!admin) {
+      return res.status(401).json({
+        status: "error",
+        message: "Invalid authentication token",
+      })
+    }
+
+    req.admin = admin
+    next()
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      return res.status(401).json({
+        status: "error",
+        message: "Token expired",
+      })
+    }
+
+    return res.status(401).json({
+      status: "error",
+      message: "Authentication failed",
+    })
+  }
+}
+
+export const authorize = (requiredPermissions: string[]) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.admin || !req.admin.role) {
+      return res.status(403).json({
+        status: "error",
+        message: "Forbidden: Missing role information",
+      })
+    }
+
+    const hasAllPermissions = requiredPermissions.every((permission) =>
+      req.admin?.role.permissions.includes(permission),
+    )
+
+    if (!hasAllPermissions) {
+      return res.status(403).json({
+        status: "error",
+        message: "Forbidden: Insufficient permissions",
+      })
+    }
+
+    next()
+  }
+}
+
