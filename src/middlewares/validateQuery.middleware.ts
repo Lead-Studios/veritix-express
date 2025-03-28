@@ -2,10 +2,13 @@ import type { Request, Response, NextFunction } from "express"
 import { validate } from "class-validator"
 import { plainToInstance } from "class-transformer"
 
-export const validateDto = (dtoClass: any) => {
+export const validateQueryDto = (dtoClass: any) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    const dtoObj = plainToInstance(dtoClass, req.body)
-    const errors = await validate(dtoObj)
+    const dtoObj = plainToInstance(dtoClass, req.query, {
+      enableImplicitConversion: true,
+    })
+
+    const errors = await validate(dtoObj as object)
 
     if (errors.length > 0) {
       const formattedErrors = errors.map((error) => ({
@@ -20,7 +23,7 @@ export const validateDto = (dtoClass: any) => {
       })
     }
 
-    req.body = dtoObj
+    req.query = dtoObj as any
     next()
   }
 }

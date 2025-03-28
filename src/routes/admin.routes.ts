@@ -2,7 +2,7 @@ import { Router } from "express"
 import { AdminController } from "../controllers/admin.controller"
 import { CreateAdminDto, LoginAdminDto, ForgotPasswordDto, ResetPasswordDto, RefreshTokenDto } from "../dtos/admin.dto"
 import { validateDto } from "../middlewares/validate.middleware"
-import { authenticate } from "../middlewares/adminAuth.middleware"
+import { authenticate } from "../middlewares/auth.middleware"
 import { uploadProfileImage } from "../middlewares/upload.middleware"
 
 const router = Router()
