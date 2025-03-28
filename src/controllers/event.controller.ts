@@ -1,78 +1,107 @@
-import { AppDataSource } from '../data-source';
-import { Request, Response } from 'express';
-import { Event } from '../entities/event.entity';
-import { Poster } from '../entities/poster.entity';
+import { Request, Response, NextFunction } from 'express';
+import { EventService } from '../services/event.service';
+import type { CreateEventDto, UpdateEventDto } from '../dtos/event.dto';
 
-const eventRepository = AppDataSource.getRepository(Event);
-const posterRepository = AppDataSource.getRepository(Poster);
+export class EventController {
+  private eventService = new EventService();
 
-export const createEvent = async (req: Request, res: Response) => {
-  try {
-    const event = eventRepository.create(req.body);
-    await eventRepository.save(event);
-    res.status(201).json({ status: 'success', message: 'Event created successfully', data: event });
-  } catch (error) {
-    res.status(500).json({ status: 'error', message: 'Error creating event', error });
-  }
-};
-
-export const getAllEvents = async (_: Request, res: Response) => {
-  try {
-    const events = await eventRepository.find();
-    res.status(200).json({ status: 'success', data: events });
-  } catch (error) {
-    res.status(500).json({ status: 'error', message: 'Error retrieving events', error });
-  }
-};
-
-export const getEventById = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const event = await eventRepository.findOne({ 
-      where: { id: Number(req.params.id) },
-      relations: ['posters'] // Add relation to load posters
-    });
-
-    if (!event) {
-      res.status(404).json({ status: 'error', message: 'Event not found' });
-      return; // Ensure function execution stops
+  // Create a new event
+  createEvent = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const eventData: CreateEventDto = req.body;
+      const event = await this.eventService.createEvent(eventData);
+      
+      res.status(201).json({ 
+        status: 'success', 
+        message: 'Event created successfully', 
+        data: event 
+      });
+    } catch (error) {
+      console.error('Error creating event:', error);
+      next(error);
     }
+  };
 
-    res.status(200).json({ status: 'success', data: event });
-  } catch (error) {
-    res.status(500).json({ status: 'error', message: 'Error retrieving event', error });
-  }
-};
-
-export const updateEvent = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const event = await eventRepository.findOne({ where: { id: Number(req.params.id) } });
-
-    if (!event) {
-      res.status(404).json({ status: 'error', message: 'Event not found' });
-      return;
+  // Get all events
+  getAllEvents = async (_req: Request, res: Response, next: NextFunction) => {
+    try {
+      const events = await this.eventService.getAllEvents();
+      
+      res.status(200).json({ 
+        status: 'success', 
+        data: events 
+      });
+    } catch (error) {
+      next(error);
     }
+  };
 
-    Object.assign(event, req.body);
-    await eventRepository.save(event);
-
-    res.status(200).json({ status: 'success', message: 'Event updated successfully', data: event });
-  } catch (error) {
-    res.status(500).json({ message: 'Error updating event', error });
-  }
-};
-  
-export const deleteEvent = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const event = await eventRepository.findOne({ where: { id: Number(req.params.id) } });
-
-    if (!event) {
-      res.status(404).json({ message: 'Event not found' });
-      return;
+  // Get event by ID
+  getEventById = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id = Number(req.params.id);
+      const event = await this.eventService.getEventById(id);
+      
+      res.status(200).json({ 
+        status: 'success', 
+        data: event 
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === "Event not found") {
+        return res.status(404).json({ 
+          status: 'error', 
+          message: 'Event not found' 
+        });
+      }
+      next(error);
     }
+  };
 
-    await eventRepository.remove(event);
-    res.status(200).json({ message: 'Event deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error deleting event', error });
-  }
-};
+  // Update event
+  updateEvent = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id = Number(req.params.id);
+      const updateData: UpdateEventDto = req.body;
+      const updatedEvent = await this.eventService.updateEvent(id, updateData);
+      
+      res.status(200).json({ 
+        status: 'success', 
+        message: 'Event updated successfully', 
+        data: updatedEvent 
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === "Event not found") {
+        return res.status(404).json({ 
+          status: 'error', 
+          message: 'Event not found' 
+        });
+      }
+      next(error);
+    }
+  };
+
+  // Delete event
+  deleteEvent = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id = Number(req.params.id);
+      await this.eventService.deleteEvent(id);
+      
+      res.status(200).json({ 
+        status: 'success', 
+        message: 'Event deleted successfully' 
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === "Event not found") {
+        return res.status(404).json({ 
+          status: 'error', 
+          message: 'Event not found' 
+        });
+      }
+      next(error);
+    }
+  };
+}
+
+// Export controller instance for router
+const eventController = new EventController();
+export const { createEvent, getAllEvents, getEventById, updateEvent, deleteEvent } = eventController;

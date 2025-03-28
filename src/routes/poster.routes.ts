@@ -13,7 +13,7 @@ const posterController = new PosterController()
 router.post(
   "/",
   authenticate,
-  authorize(["event_manager"]),
+  authorize(["admin", "event_manager"]),
   uploadPosterImage,
   validateDto(CreatePosterDto),
   posterController.uploadPoster
@@ -34,19 +34,11 @@ router.get(
   posterController.getPosterById
 )
 
-// Get all posters for a specific event
-router.get(
-  "/event/:eventId/posters",
-  authenticate,
-  validateParamDto(EventParamDto),
-  posterController.getPostersByEventId
-)
-
 // Update poster
 router.put(
   "/:id",
   authenticate,
-  authorize(["event_manager"]),
+  authorize(["admin", "event_manager"]),
   validateParamDto(PosterParamDto),
   validateDto(UpdatePosterDto),
   posterController.updatePoster
@@ -56,7 +48,7 @@ router.put(
 router.delete(
   "/:id",
   authenticate,
-  authorize(["event_manager"]),
+  authorize(["admin", "event_manager"]),
   validateParamDto(PosterParamDto),
   posterController.deletePoster
 )
