@@ -1,6 +1,7 @@
 import "reflect-metadata"
 import { AppDataSource } from "../src/config/database"
 import { Role } from "../src/entities/role.entity"
+import { User } from "../src/entities/user.entity";
 
 async function initializeDatabase() {
   try {
@@ -38,11 +39,45 @@ async function initializeDatabase() {
       permissions: ["user:read", "user:update"],
     })
 
+    // Create event manager role
+    const eventManagerRole = roleRepository.create({
+      name: "event_manager",
+      permissions: [
+        "event:create",
+        "event:read",
+        "event:update",
+        "event:delete",
+        "poster:create",
+        "poster:read",
+        "poster:update",
+        "poster:delete"
+      ],
+    })
+
     // Save roles to database
-    await roleRepository.save([adminRole, moderatorRole])
+    await roleRepository.save([adminRole, moderatorRole, eventManagerRole])
     console.log("Roles created successfully")
 
     // Create a super admin user
+    // const userRepository = AppDataSource.getRepository(User);
+    
+    // // Check if super admin already exists
+    // const superAdminExists = await userRepository.findOne({ where: { email: "admin@veritix.com" } });
+    
+    // if (!superAdminExists) {
+    //   // Create super admin user
+    //   const superAdmin = userRepository.create({
+    //     email: "admin@veritix.com",
+    //     firstName: "super",
+    //     lastName: "admin",
+    //     isActive: true
+    //   });
+      
+    //   await userRepository.save(superAdmin);
+    //   console.log("Super admin user created successfully");
+    // } else {
+    //   console.log("Super admin user already exists");
+    // }
     console.log("Database initialized successfully")
   } catch (error) {
     console.error("Error initializing database:", error)
