@@ -41,3 +41,11 @@ export const uploadProfileImage = multer({
   },
 }).single("profileImage")
 
+export const uploadPosterImage = multer({
+  storage,
+  fileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+}).single("posterImage")
+
