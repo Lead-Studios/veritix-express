@@ -1,54 +1,53 @@
-import { Request, Response, NextFunction } from "express";
-import { UserService } from "../services/user.service";
+import type { Request, Response, NextFunction } from "express"
+import { UserService } from "../services/user.service"
+import type { GetUsersQueryDto, GetUserReportsQueryDto, UserParamDto } from "../dtos/user.dto"
 
 export class UserController {
-    private userService = new UserService();
+  private userService = new UserService()
 
-    getUserDetails = async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const user = await this.userService.getUserDetails(req.user.id);
-            if (!user) return res.status(404).json({ message: "User not found" });
+  // Get all users
+  getAllUsers = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const queryParams: GetUsersQueryDto = req.query as any
+      const result = await this.userService.getAllUsers(queryParams)
 
-            res.status(200).json(user);
-        } catch (error) {
-            next(error);
-        }
-    };
+      res.status(200).json({
+        status: "success",
+        data: result,
+      })
+    } catch (error) {
+      next(error)
+    }
+  }
 
-    updateUserProfile = async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const updatedUser = await this.userService.updateUserProfile(req.user.id, req.body);
-            if (!updatedUser) return res.status(404).json({ message: "User not found" });
+  // Get user by ID
+  getUserById = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params as unknown as UserParamDto
+      const user = await this.userService.getUserById(id)
 
-            res.status(200).json(updatedUser);
-        } catch (error) {
-            next(error);
-        }
-    };
+      res.status(200).json({
+        status: "success",
+        data: user,
+      })
+    } catch (error) {
+      next(error)
+    }
+  }
 
-    changePassword = async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const { currentPassword, newPassword } = req.body;
-            const success = await this.userService.changePassword(req.user.id, currentPassword, newPassword);
+  // Generate user reports
+  generateUserReports = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const queryParams: GetUserReportsQueryDto = req.query as any
+      const reports = await this.userService.generateUserReports(queryParams)
 
-            if (!success) return res.status(400).json({ message: "Invalid current password" });
-
-            res.status(200).json({ message: "Password updated successfully" });
-        } catch (error) {
-            next(error);
-        }
-    };
-
-    updateProfileImage = async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            if (!req.file) return res.status(400).json({ message: "No file uploaded" });
-
-            const updatedUser = await this.userService.updateProfileImage(req.user.id, req.file.filename);
-            if (!updatedUser) return res.status(404).json({ message: "User not found" });
-
-            res.status(200).json(updatedUser);
-        } catch (error) {
-            next(error);
-        }
-    };
+      res.status(200).json({
+        status: "success",
+        data: reports,
+      })
+    } catch (error) {
+      next(error)
+    }
+  }
 }
+
