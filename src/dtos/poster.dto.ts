@@ -1,7 +1,9 @@
-import { IsNotEmpty, IsUUID, IsString, IsOptional, IsNumber } from "class-validator"
+import { IsNotEmpty, IsUUID, IsString, IsOptional, IsNumber, IsBoolean } from "class-validator"
+import { Type } from "class-transformer"
 
 export class CreatePosterDto {
   @IsNotEmpty()
+  @Type(() => Number)
   @IsNumber()
   eventId!: number
 
@@ -16,11 +18,13 @@ export class UpdatePosterDto {
   description?: string
 
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   eventId?: number
 
   @IsOptional()
-  @IsString()
+  @Type(() => Boolean)
+  @IsBoolean()
   isActive?: boolean
 }
 
@@ -32,6 +36,7 @@ export class PosterParamDto {
 
 export class EventParamDto {
   @IsNotEmpty()
+  @Type(() => Number)
   @IsNumber()
   eventId!: number
 }

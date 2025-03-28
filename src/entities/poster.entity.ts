@@ -7,7 +7,7 @@ export class Poster {
   id!: string
 
   @Column()
-  filename!: string
+  posterImage!: string
 
   @Column({ nullable: true })
   description!: string
