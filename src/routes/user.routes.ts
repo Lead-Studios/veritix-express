@@ -1,6 +1,6 @@
 import { Router } from "express"
 import { UserController } from "../controllers/user.controller"
-import { authenticate, authorize } from "../middleware/auth.middleware"
+import { authenticate, authorize } from "../middlewares/auth.middleware"
 import { GetUsersQueryDto, GetUserReportsQueryDto, UserParamDto } from "../dtos/user.dto"
 import { validateQueryDto } from "../middlewares/validateQuery.middleware"
 import { validateParamDto } from "../middlewares/validateParam.middleware"
