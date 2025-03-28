@@ -15,7 +15,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME || "admin_portal",
   synchronize: process.env.NODE_ENV !== "production", // Don't use in production
   logging: process.env.NODE_ENV !== "production",
-  entities: [Admin, Role, RefreshToken, Event, Ticket,User],
+  entities: [Admin, Role, RefreshToken, Event, Ticket, User],
   migrations: ["src/migrations/**/*.ts"],
   subscribers: [],
 })
