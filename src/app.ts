@@ -3,8 +3,10 @@ import cors from "cors"
 import helmet from "helmet"
 import "reflect-metadata"
 import { AppDataSource } from "./config/database"
-import router from "./routes/index"
+import adminRoutes from "./routes/admin.routes"
 import { errorHandler, notFoundHandler } from "./middlewares/error.middleware"
+import 'reflect-metadata';
+import userRoutes from "./routes/userRoutes"
 
 // Initialize express app
 const app = express()
@@ -16,7 +18,8 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 // Routes
-app.use("/api", router)
+app.use("/admin", adminRoutes)
+app.use("/users", userRoutes) 
 
 // Error handling
 app.use(notFoundHandler)
