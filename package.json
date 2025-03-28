@@ -7,7 +7,7 @@
     "start": "node dist/index.js",
     "dev": "nodemon --exec ts-node src/index.ts",
     "build": "tsc",
-    "init-db": "ts-node src/scripts/init-db.ts",
+    "init-db": "ts-node script/init-db.ts",
     "test": "jest"
   },
   "dependencies": {
