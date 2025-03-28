@@ -38,8 +38,23 @@ async function initializeDatabase() {
       permissions: ["user:read", "user:update"],
     })
 
+    // Create event manager role
+    const eventManagerRole = roleRepository.create({
+      name: "event_manager",
+      permissions: [
+        "event:create",
+        "event:read",
+        "event:update",
+        "event:delete",
+        "poster:create",
+        "poster:read",
+        "poster:update",
+        "poster:delete"
+      ],
+    })
+
     // Save roles to database
-    await roleRepository.save([adminRole, moderatorRole])
+    await roleRepository.save([adminRole, moderatorRole, eventManagerRole])
     console.log("Roles created successfully")
 
     // Create a super admin user
