@@ -1,10 +1,13 @@
+
 import { DataSource } from "typeorm"
 import { RefreshToken } from "../entities/refreshToken.entity"
 import { Role } from "../entities/role.entity"
 import { Admin } from "../entities/admin.entity"
-import { Event } from "../entities/event.entity"
+import { User } from "../model/user.entity"
 import { Poster } from "../entities/poster.entity"
-import { User } from "../entities/user.entity"
+import { Event } from "../entities/event.entity"
+
+
 
 export const AppDataSource = new DataSource({
   type: "postgres", // Change to your database type
@@ -15,8 +18,11 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME || "admin_portal",
   synchronize: process.env.NODE_ENV !== "production", // Don't use in production
   logging: process.env.NODE_ENV !== "production",
-  entities: [Admin, Role, Event, Poster, RefreshToken, User],
+  entities: [Admin, Role, RefreshToken, User],
   migrations: ["src/migrations/**/*.ts"],
   subscribers: [],
 })
+
+
+
 
