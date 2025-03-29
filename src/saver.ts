@@ -5,6 +5,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { AppDataSource } from './config/database';
 import adminRoutes from './routes/admin.routes';
+import gameRoutes from './routes/gameSessionRoutes'; // Import the game session routes
 
 dotenv.config();
 
@@ -14,6 +15,7 @@ app.use(cors());
 app.use(helmet());
 
 app.use('/admin', adminRoutes);
+app.use('/game', gameRoutes); // Add game session routes
 
 AppDataSource.initialize()
   .then(() => {
