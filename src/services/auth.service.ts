@@ -34,6 +34,8 @@ export class AuthService {
 
     const admin = this.adminRepository.create({
       ...adminData,
+      // Generate name from firstName and lastName
+      name: `${adminData.firstName} ${adminData.lastName}`,
       password: hashedPassword,
       role,
     })

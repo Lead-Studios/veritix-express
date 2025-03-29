@@ -1,8 +1,13 @@
+
 import { DataSource } from "typeorm"
 import { RefreshToken } from "../entities/refreshToken.entity"
 import { Role } from "../entities/role.entity"
 import { Admin } from "../entities/admin.entity"
 import { User } from "../model/user.entity"
+import { Poster } from "../entities/poster.entity"
+import { Event } from "../entities/event.entity"
+
+
 
 export const AppDataSource = new DataSource({
   type: "postgres", // Change to your database type
@@ -17,4 +22,7 @@ export const AppDataSource = new DataSource({
   migrations: ["src/migrations/**/*.ts"],
   subscribers: [],
 })
+
+
+
 

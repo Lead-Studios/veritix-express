@@ -20,6 +20,7 @@ export class Admin {
 
   @Column({ nullable: true })
   profileImage!: string
+
   @Column()
   password!: string
 
