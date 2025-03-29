@@ -8,6 +8,7 @@ import adminRoutes from "./routes/admin.routes"
 import eventRoutes from "./routes/event.routes"
 import posterRoutes from "./routes/poster.routes"
 import userRoutes from "./routes/user.routes"
+import referralRoutes from "./routes/referral.routes"
 
 // Initialize express app
 const app = express()
@@ -23,6 +24,7 @@ app.use("/admin", adminRoutes)
 app.use("/events", eventRoutes)
 app.use("/posters", posterRoutes)
 app.use("/users", userRoutes)
+app.use("/referrals", referralRoutes)
 
 // Error handling
 app.use(notFoundHandler)
@@ -43,4 +45,3 @@ AppDataSource.initialize()
   })
 
 export default app
-
