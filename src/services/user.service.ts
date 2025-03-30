@@ -1,7 +1,7 @@
 import { AppDataSource } from "../config/database"
 import { Between, MoreThanOrEqual } from "typeorm"
 import { type GetUsersQueryDto, type GetUserReportsQueryDto, TimeFilter } from "../dtos/user.dto"
-import { User } from "../model/user.entity"
+import { User } from "../entities/user.entity"
 
 export class UserService {
   private userRepository = AppDataSource.getRepository(User)

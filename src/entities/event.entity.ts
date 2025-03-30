@@ -4,7 +4,9 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from "typeorm";
+import { Poster } from "./poster.entity";
 
 @Entity()
 export class Event {
@@ -55,6 +57,9 @@ export class Event {
 
   @Column({ type: "varchar", length: 255, nullable: true })
   instagram?: string;
+
+  @OneToMany(() => Poster, (poster) => poster.event)
+  posters?: Poster[];
 
   @CreateDateColumn()
   createdAt!: Date;
