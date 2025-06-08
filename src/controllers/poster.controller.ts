@@ -1,168 +1,139 @@
-import type { Request, Response, NextFunction } from "express"
+import type { Response } from "express"
 import { PosterService } from "../services/poster.service"
-import { CreatePosterDto, UpdatePosterDto } from "../dtos/poster.dto"
-import { plainToInstance } from "class-transformer"
+import type { AuthRequest, CreatePosterDTO, UpdatePosterDTO } from "../types/poster.types"
 
 export class PosterController {
-  private posterService = new PosterService()
+  private posterService: PosterService
 
-  // Upload a new poster
-  uploadPoster = async (req: Request, res: Response, next: NextFunction) => {
+  constructor() {
+    this.posterService = new PosterService()
+  }
+
+  async createPoster(req: AuthRequest, res: Response): Promise<void> {
     try {
       if (!req.file) {
-        return res.status(400).json({
-          status: "error",
-          message: "No file uploaded",
-        })
+        res.status(400).json({ error: "Poster image is required" })
+        return
       }
-      
-      const posterData: CreatePosterDto = req.body
 
-      const savedPoster = await this.posterService.createPoster(req.file, posterData)
+      const posterData: CreatePosterDTO = {
+        description: req.body.description,
+        eventId: req.body.eventId,
+      }
+
+      const imageUrl = `/uploads/posters/${req.file.filename}`
+      const uploadedBy = req.user!.id
+
+      const poster = await this.posterService.createPoster(posterData, imageUrl, uploadedBy)
 
       res.status(201).json({
-        status: "success",
-        data: savedPoster,
+        message: "Poster created successfully",
+        poster,
       })
     } catch (error) {
-      if (error instanceof Error && error.message === "Event not found") {
-        return res.status(404).json({
-          status: "error",
-          message: "Event not found",
-        })
-      }
-      next(error)
+      console.error("Error creating poster:", error)
+      res.status(500).json({
+        error: error instanceof Error ? error.message : "Internal server error",
+      })
     }
   }
 
-  // Get all posters
-  getAllPosters = async (_req: Request, res: Response, next: NextFunction) => {
+  async getAllPosters(req: AuthRequest, res: Response): Promise<void> {
     try {
-      const posters = await this.posterService.getAllPosters()
+      const page = Number.parseInt(req.query.page as string) || 1
+      const limit = Number.parseInt(req.query.limit as string) || 10
 
-      res.status(200).json({
-        status: "success",
-        data: posters,
+      const result = await this.posterService.getAllPosters(page, limit)
+
+      res.json({
+        message: "Posters retrieved successfully",
+        ...result,
       })
     } catch (error) {
-      next(error)
+      console.error("Error retrieving posters:", error)
+      res.status(500).json({ error: "Internal server error" })
     }
   }
 
-  // Get poster by ID
-  getPosterById = async (req: Request, res: Response, next: NextFunction) => {
+  async getPosterById(req: AuthRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params
       const poster = await this.posterService.getPosterById(id)
 
-      res.status(200).json({
-        status: "success",
-        data: poster,
+      if (!poster) {
+        res.status(404).json({ error: "Poster not found" })
+        return
+      }
+
+      res.json({
+        message: "Poster retrieved successfully",
+        poster,
       })
     } catch (error) {
-      if (error instanceof Error && error.message === "Poster not found") {
-        return res.status(404).json({
-          status: "error",
-          message: "Poster not found",
-        })
-      }
-      next(error)
+      console.error("Error retrieving poster:", error)
+      res.status(500).json({ error: "Internal server error" })
     }
   }
 
-  // Get all posters for a specific event
-  getPostersByEventId = async (req: Request, res: Response, next: NextFunction) => {
+  async getPostersByEventId(req: AuthRequest, res: Response): Promise<void> {
     try {
-      const { id } = req.params  // Now using 'id' instead of 'eventId'
-      const posters = await this.posterService.getPostersByEventId(Number(id))
+      const { eventId } = req.params
+      const posters = await this.posterService.getPostersByEventId(eventId)
 
-      res.status(200).json({
-        status: "success",
-        data: posters,
+      res.json({
+        message: "Event posters retrieved successfully",
+        posters,
+        count: posters.length,
       })
     } catch (error) {
-      if (error instanceof Error && error.message === "Event not found") {
-        return res.status(404).json({
-          status: "error",
-          message: "Event not found",
-        })
-      }
-      next(error)
+      console.error("Error retrieving event posters:", error)
+      res.status(500).json({ error: "Internal server error" })
     }
   }
 
-  // Update poster
-  updatePoster = async (req: Request, res: Response, next: NextFunction) => {
+  async updatePoster(req: AuthRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      console.log("Request body:", req.body);
-      console.log("Content-Type:", req.headers['content-type']);
-      
-      let updateData: UpdatePosterDto;
-      
-      // Handle different content types
-      if (req.headers['content-type']?.includes('application/x-www-form-urlencoded')) {
-        // For form data, do manual conversions
-        if (req.body.isActive !== undefined) {
-          if (req.body.isActive === 'true' || req.body.isActive === true) {
-            req.body.isActive = true;
-          } else if (req.body.isActive === 'false' || req.body.isActive === false) {
-            req.body.isActive = false;
-          }
-        }
-        
-        if (req.body.eventId !== undefined) {
-          req.body.eventId = Number(req.body.eventId);
-        }
+      const updateData: UpdatePosterDTO = req.body
+      const userId = req.user!.id
+
+      const poster = await this.posterService.updatePoster(id, updateData, userId)
+
+      if (!poster) {
+        res.status(404).json({ error: "Poster not found" })
+        return
       }
-      
-      // Transform to DTO class for both JSON and form data
-      updateData = plainToInstance(UpdatePosterDto, req.body);
-      console.log("Transformed updateData:", updateData);
 
-      const updatedPoster = await this.posterService.updatePoster(id, updateData)
-
-      res.status(200).json({
-        status: "success",
-        data: updatedPoster,
+      res.json({
+        message: "Poster updated successfully",
+        poster,
       })
     } catch (error) {
-      if (error instanceof Error) {
-        if (error.message === "Poster not found") {
-          return res.status(404).json({
-            status: "error",
-            message: "Poster not found",
-          })
-        } else if (error.message === "Event not found") {
-          return res.status(404).json({
-            status: "error",
-            message: "Event not found",
-          })
-        }
-      }
-      console.error("Error updating poster:", error);
-      next(error)
+      console.error("Error updating poster:", error)
+      res.status(500).json({
+        error: error instanceof Error ? error.message : "Internal server error",
+      })
     }
   }
 
-  // Delete poster
-  deletePoster = async (req: Request, res: Response, next: NextFunction) => {
+  async deletePoster(req: AuthRequest, res: Response): Promise<void> {
     try {
       const { id } = req.params
-      await this.posterService.deletePoster(id)
+      const userId = req.user!.id
 
-      res.status(200).json({
-        status: "success",
-        message: "Poster deleted successfully",
-      })
-    } catch (error) {
-      if (error instanceof Error && error.message === "Poster not found") {
-        return res.status(404).json({
-          status: "error",
-          message: "Poster not found",
-        })
+      const deleted = await this.posterService.deletePoster(id, userId)
+
+      if (!deleted) {
+        res.status(404).json({ error: "Poster not found" })
+        return
       }
-      next(error)
+
+      res.json({ message: "Poster deleted successfully" })
+    } catch (error) {
+      console.error("Error deleting poster:", error)
+      res.status(500).json({
+        error: error instanceof Error ? error.message : "Internal server error",
+      })
     }
   }
 }

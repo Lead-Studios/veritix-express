@@ -1,56 +1,57 @@
-import { Router } from "express"
-import { authenticate, authorize } from "../middlewares/auth.middleware"
-import { uploadPosterImage } from "../middlewares/upload.middleware"
-import { validateDto } from "../middlewares/validate.middleware"
-import { validateParamDto } from "../middlewares/validateParam.middleware"
-import { CreatePosterDto, UpdatePosterDto, PosterParamDto, EventParamDto } from "../dtos/poster.dto"
-import { PosterController } from "../controllers/poster.controller"
+import { Router } from 'express';
+import { PosterController } from '../controllers/poster.controller';
+import { authenticateToken, requireRole } from '../middleware/auth.middleware';
+import { upload } from '../config/multer';
+import {
+  validateCreatePoster,
+  validateUpdatePoster,
+  validatePosterParams,
+  handleValidationErrors,
+} from '../middleware/validation.middleware';
 
-const router = Router()
-const posterController = new PosterController()
+const router = Router();
+const posterController = new PosterController();
 
-// Upload a new poster
 router.post(
-  "/",
-  authenticate,
-  authorize(["admin", "event_manager"]),
-  uploadPosterImage,
-  validateDto(CreatePosterDto),
-  posterController.uploadPoster
-)
+  '/',
+  authenticateToken,
+  requireRole(['admin', 'organizer']),
+  upload.single('posterImage'),
+  validateCreatePoster,
+  handleValidationErrors,
+  posterController.createPoster.bind(posterController)
+);
 
-// Get all posters
 router.get(
-  "/",
-  authenticate,
-  posterController.getAllPosters
-)
+  '/',
+  authenticateToken,
+  posterController.getAllPosters.bind(posterController)
+);
 
-// Get poster by ID
 router.get(
-  "/:id",
-  authenticate,
-  validateParamDto(PosterParamDto),
-  posterController.getPosterById
-)
+  '/:id',
+  authenticateToken,
+  validatePosterParams,
+  handleValidationErrors,
+  posterController.getPosterById.bind(posterController)
+);
 
-// Update poster
 router.put(
-  "/:id",
-  authenticate,
-  authorize(["admin", "event_manager"]),
-  validateParamDto(PosterParamDto),
-  validateDto(UpdatePosterDto),
-  posterController.updatePoster
-)
+  '/:id',
+  authenticateToken,
+  requireRole(['admin', 'organizer']),
+  validateUpdatePoster,
+  handleValidationErrors,
+  posterController.updatePoster.bind(posterController)
+);
 
-// Delete poster
 router.delete(
-  "/:id",
-  authenticate,
-  authorize(["admin", "event_manager"]),
-  validateParamDto(PosterParamDto),
-  posterController.deletePoster
-)
+  '/:id',
+  authenticateToken,
+  requireRole(['admin', 'organizer']),
+  validatePosterParams,
+  handleValidationErrors,
+  posterController.deletePoster.bind(posterController)
+);
 
-export default router
+export default router;
