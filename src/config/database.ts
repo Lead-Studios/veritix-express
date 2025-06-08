@@ -1,28 +1,8 @@
+import { Pool } from "pg"
 
-import { DataSource } from "typeorm"
-import { RefreshToken } from "../entities/refreshToken.entity"
-import { Role } from "../entities/role.entity"
-import { Admin } from "../entities/admin.entity"
-import { User } from "../model/user.entity"
-import { Poster } from "../entities/poster.entity"
-import { Event } from "../entities/event.entity"
-
-
-
-export const AppDataSource = new DataSource({
-  type: "postgres", // Change to your database type
-  host: process.env.DB_HOST || "localhost",
-  port: Number.parseInt(process.env.DB_PORT || "5432"),
-  username: process.env.DB_USERNAME || "postgres",
-  password: process.env.DB_PASSWORD || "postgres",
-  database: process.env.DB_NAME || "admin_portal",
-  synchronize: process.env.NODE_ENV !== "production", // Don't use in production
-  logging: process.env.NODE_ENV !== "production",
-  entities: [Admin, Role, RefreshToken, User],
-  migrations: ["src/migrations/**/*.ts"],
-  subscribers: [],
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
 })
 
-
-
-
+export default pool
